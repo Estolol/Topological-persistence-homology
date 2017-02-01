@@ -39,11 +39,13 @@ public class ReadFiltration {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		if (args.length != 1) {
-			System.out.println("Syntax: java ReadFiltration <filename>");
-			System.exit(0);
-		}
+		String input = "input.txt";
+		String output = "output.txt";
 			
-		System.out.println(readFiltration(args[0]));
+		DenseMatrix matrix = new DenseMatrix(readFiltration(input));
+		matrix.sortVect();
+		matrix.initMatrix();
+		matrix.reduction();
+		matrix.barcode(output);
 	}
 }
