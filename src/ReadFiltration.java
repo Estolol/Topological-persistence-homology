@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.TreeSet;
@@ -43,9 +44,12 @@ public class ReadFiltration {
 		String output = "output.txt";
 			
 		DenseMatrix matrix = new DenseMatrix(readFiltration(input));
+		//SparseMatrix matrix = new SparseMatrix(readFiltration(input));
 		matrix.sortVect();
 		matrix.initMatrix();
 		matrix.reduction();
 		matrix.barcode(output);
+		//System.out.println(matrix.F);
+		//System.out.println(Arrays.deepToString(matrix.matrix));
 	}
 }
