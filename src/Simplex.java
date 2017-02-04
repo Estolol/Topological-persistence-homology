@@ -1,5 +1,6 @@
 import java.util.*;
 
+// provided code of a class to represent a simplex
 class Simplex {
 	float val;
 	int dim;

@@ -57,6 +57,19 @@ public class DenseMatrix {
 		}
 	}
 
+	@Override
+	public String toString(){
+		String out = "";
+		for(int i=0; i<F.size();i++){
+			for(int j=0; j<F.size()-1;j++){
+				out += matrix[j][i]+" ";
+			}
+			out += matrix[F.size()-1][i]+"\n";
+		}
+		return out;
+	}
+
+
 	public void reduction(){
 		// on va stocker les pivots dans pivots, les clefs seront l'emplacement du 1 le plus bas
 		int size = F.size();
