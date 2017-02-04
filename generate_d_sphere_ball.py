@@ -30,7 +30,7 @@ if __name__ == '__main__':
     if(sphere):
         scomplex = scomplex[:-1]
     # we then write to a file with a trivial filtration
-    f = open(str(d)+"-"+sys.argv[1]+".txt",'w')
+    f = open("input/"+str(d)+"-"+sys.argv[1]+".in",'w')
     i = 0.0
     for s in scomplex:
         f.write(str(i)+" "+str(len(s)-1)+" "+(" ".join([str(n) for n in s]))+"\n")

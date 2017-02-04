@@ -16,27 +16,39 @@ public class ReadFiltration {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		String input = args[0];
-		String output = "output.txt";
+		String base = args[0];
 		boolean dense = true; // switch between dense or sparse representations of matrices
+		long startTime = System.currentTimeMillis();
+
 		if(dense){
-			DenseMatrix matrix = new DenseMatrix(readFiltration(input));
+			DenseMatrix matrix = new DenseMatrix(readFiltration("input/"+base+".in"));
 			matrix.sortVect();
 			matrix.initMatrix();
-			//matrix.reduction();
-			//matrix.barcode(output);
-			//System.out.println(matrix.F);
-			System.out.println(matrix.toString());
-			//System.out.println(Arrays.deepToString(matrix.matrix));
+			long initTime = System.currentTimeMillis();
+			matrix.reduction();
+			long reductionTime = System.currentTimeMillis();
+			matrix.barcode("results/"+base+".out");
+			long endTime = System.currentTimeMillis();
+			//System.out.println(matrix.toString());
+			System.out.println("Barcode construction on "+base+" using Dense Matrices took " + ((float)(endTime - startTime)/1000) + " seconds.");
+			System.out.println("Initialisation: " + ((float)(initTime - startTime)/1000) + " seconds.");
+			System.out.println("Reduction: " + ((float)(reductionTime - initTime)/1000) + " seconds.");
+			System.out.println("Barcode extraction: " + ((float)(endTime - reductionTime)/1000) + " seconds.");
 		}
 		else{
-			/* SparseMatrix matrix = new SparseMatrix(readFiltration(input));
+			/* SparseMatrix matrix = new SparseMatrix(readFiltration("input/"+base+".in"));
 			matrix.sortVect();
 			matrix.initMatrix();
+			long initTime = System.currentTimeMillis();
 			matrix.reduction();
-			matrix.barcode(output);
-			//System.out.println(matrix.F);
-			System.out.println(Arrays.deepToString(matrix.matrix));
+			long reductionTime = System.currentTimeMillis();
+			matrix.barcode("results/"+base+".out");
+			long endTime = System.currentTimeMillis();
+			//System.out.println(matrix.toString());
+			System.out.println("Barcode construction on "+base+" using Spare Matrices took " + ((endTime - startTime)/1000) + " seconds.");
+			System.out.println("Initialisation: " + ((initTime - startTime)/1000) + " seconds.");
+			System.out.println("Reduction: " + ((reductionTime - initTime)/1000) + " seconds.");
+			System.out.println("Barcode extraction: " + ((endTime - reductionTime)/1000) + " seconds.");
 			*/
 		}
 	}
