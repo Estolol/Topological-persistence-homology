@@ -8,7 +8,7 @@ public class DenseMatrix {
 	Vector<Simplex> F;
 	int[][] matrix;
 	HashMap<Integer,int[]> pivots = new HashMap<Integer,int[]>();
-	HashMap<TreeSet<Integer>,Integer> reverse = new HashMap<TreeSet<Integer>,Integer>(); // from the list of vertices, find the index in F (post-sort)
+	HashMap<HashSet<Integer>,Integer> reverse = new HashMap<HashSet<Integer>,Integer>(); // from the list of vertices, find the index in F (post-sort)
 
 	public DenseMatrix(Vector<Simplex> F){
 		this.F=F;
@@ -38,8 +38,8 @@ public class DenseMatrix {
 		int size = F.size();
 		matrix = new int[size][size]; //matrice qu'on veut remplir
 		Simplex simp;
-		TreeSet<Integer> vertices;
-		TreeSet<Integer> copy;
+		HashSet<Integer> vertices;
+		HashSet<Integer> copy;
 
 		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
 			simp = F.get(k);
@@ -48,7 +48,7 @@ public class DenseMatrix {
 			}
 
 			vertices = simp.vert;
-			copy = new TreeSet<Integer>(vertices)	; // copy to iterate over vertices
+			copy = new HashSet<Integer>(vertices)	; // copy to iterate over vertices
 			for(int vertex:copy){
 				vertices.remove(vertex);
 				matrix[k][reverse.get(vertices)] = 1;
