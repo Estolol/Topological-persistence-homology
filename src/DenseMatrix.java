@@ -8,7 +8,7 @@ public class DenseMatrix {
 	Vector<Simplex> F;
 	int[][] matrix;
 	HashMap<Integer,int[]> pivots = new HashMap<Integer,int[]>();
-	HashMap<HashSet<Integer>,Integer> reverse = new HashMap<HashSet<Integer>,Integer>(); // from the list of vertices, find the index in F (post-sort)
+	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>(); // from a set of vertices, find the index in F (post-sort)
 
 	public DenseMatrix(Vector<Simplex> F){
 		this.F=F;
@@ -25,7 +25,7 @@ public class DenseMatrix {
 		    {
 		    	return Float.compare(s1.val,s2.val);
 		    }
-		});
+		}); // we compare Simplices using Float.compare on the values of the filtration
 		int size = F.size();
 		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
 			reverse.put(F.get(k).vert,k);
@@ -34,12 +34,12 @@ public class DenseMatrix {
 
 	// on remplit la matrice (matrice dense pour le moment)
 
-	public void initMatrix(){
+	public void initMatrix(){ // time complexity n * d where d is the largest dimension in F, thus n * (ln n), where n is the size of F.
 		int size = F.size();
 		matrix = new int[size][size]; //matrice qu'on veut remplir
 		Simplex simp;
-		HashSet<Integer> vertices;
-		HashSet<Integer> copy;
+		FastHashSet<Integer> vertices;
+		FastHashSet<Integer> copy;
 
 		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
 			simp = F.get(k);
@@ -48,15 +48,16 @@ public class DenseMatrix {
 			}
 
 			vertices = simp.vert;
-			copy = new HashSet<Integer>(vertices)	; // copy to iterate over vertices
+			copy = new FastHashSet<Integer>(vertices); // copy to iterate over vertices
 			for(int vertex:copy){
 				vertices.remove(vertex);
-				matrix[k][reverse.get(vertices)] = 1;
+				matrix[k][reverse.get(vertices)] = 1;	// amortized time complexity of get on a FastHashSet is constant
 				vertices.add(vertex);
 			}
 		}
 	}
 
+	// pretty printing the matrix
 	@Override
 	public String toString(){
 		String out = "";
