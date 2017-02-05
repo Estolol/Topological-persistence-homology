@@ -17,7 +17,7 @@ public class ReadFiltration {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		String base = args[0];
-		boolean dense = true; // switch between dense or sparse representations of matrices
+		boolean dense = false; // switch between dense or sparse representations of matrices
 		long startTime = System.currentTimeMillis();
 
 		if(dense){
@@ -36,7 +36,7 @@ public class ReadFiltration {
 			System.out.println("Barcode extraction: " + ((float)(endTime - reductionTime)/1000) + " seconds.");
 		}
 		else{
-			/* SparseMatrix matrix = new SparseMatrix(readFiltration("input/"+base+".in"));
+			SparseMatrix matrix = new SparseMatrix(readFiltration("input/"+base+".in"));
 			matrix.sortVect();
 			matrix.initMatrix();
 			long initTime = System.currentTimeMillis();
@@ -49,7 +49,6 @@ public class ReadFiltration {
 			System.out.println("Initialisation: " + ((initTime - startTime)/1000) + " seconds.");
 			System.out.println("Reduction: " + ((reductionTime - initTime)/1000) + " seconds.");
 			System.out.println("Barcode extraction: " + ((endTime - reductionTime)/1000) + " seconds.");
-			*/
 		}
 	}
 }
