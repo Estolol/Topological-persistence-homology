@@ -8,7 +8,7 @@ public class SparseMatrix {
 	Vector<Simplex> F;
 	ArrayList<LinkedList<Integer>> matrix; // on stocke les coordonnées où il y a des 1
 	Hashtable<Integer,Integer> pivots;
-	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>();
+	HashMap<HashSet<Integer>,Integer> reverse = new HashMap<HashSet<Integer>,Integer>();
 
 	public SparseMatrix(Vector<Simplex> F){
 		this.F=F;
@@ -43,8 +43,8 @@ public class SparseMatrix {
 		int size = F.size();
 		matrix = new ArrayList<LinkedList<Integer>>(); //matrice qu'on veut remplir
 		Simplex simp;
-		FastHashSet<Integer> vertices;
-		FastHashSet<Integer> copy;
+		HashSet<Integer> vertices;
+		HashSet<Integer> copy;
 
 		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
 			simp = F.get(k);
@@ -55,10 +55,10 @@ public class SparseMatrix {
 			}
 
 			vertices = simp.vert;
-			copy = new FastHashSet<Integer>(vertices); // copy to iterate over vertices
+			copy = new HashSet<Integer>(vertices); // copy to iterate over vertices
 			for(int vertex:copy){
 				vertices.remove(vertex);
-				column.add(reverse.get(vertices));	// amortized time complexity of get on a FastHashSet is constant
+				column.add(reverse.get(vertices));	// amortized time complexity of get on a HashSet is constant
 				vertices.add(vertex);
 			}
 

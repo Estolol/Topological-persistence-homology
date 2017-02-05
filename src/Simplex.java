@@ -4,14 +4,14 @@ import java.util.*;
 class Simplex {
 	float val;
 	int dim;
-	FastHashSet<Integer> vert;
+	HashSet<Integer> vert;
 
 	Simplex(Scanner sc){
 		val = sc.nextFloat();
 		dim = sc.nextInt();
-		vert = new FastHashSet<Integer>();
+		vert = new HashSet<Integer>();
 		for (int i=0; i<=dim; i++)
-			vert.add(sc.nextInt());
+			vert.add(sc.nextInt()+1);
 	}
 
 	public String toString(){

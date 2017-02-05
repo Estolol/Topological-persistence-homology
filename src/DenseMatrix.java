@@ -8,7 +8,7 @@ public class DenseMatrix {
 	Vector<Simplex> F;
 	int[][] matrix;
 	HashMap<Integer,Integer> pivots = new HashMap<Integer,Integer>();
-	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>(); // from a set of vertices, find the index in F (post-sort)
+	HashMap<HashSet<Integer>,Integer> reverse = new HashMap<HashSet<Integer>,Integer>(); // from a set of vertices, find the index in F (post-sort)
 	boolean[] isZeroes; // store whether matrix[i] is all zeroes or not
 	int[] lastOne; // store the largest j such that matrix[i][j] isn't zero
 
@@ -40,8 +40,8 @@ public class DenseMatrix {
 		int size = F.size();
 		matrix = new int[size][size];
 		Simplex simp;
-		FastHashSet<Integer> vertices;
-		FastHashSet<Integer> copy;
+		HashSet<Integer> vertices;
+		HashSet<Integer> copy;
 		int index;
 		for(int k = 0; k<size; k++){ // k is the index of the current simplex
 			simp = F.get(k);
@@ -49,11 +49,11 @@ public class DenseMatrix {
 			lastOne[k] = (-1);
 			if(simp.dim!=0){ // ignore points
 				vertices = simp.vert;
-				copy = new FastHashSet<Integer>(vertices); // copy to iterate over vertices
+				copy = new HashSet<Integer>(vertices); // copy to iterate over vertices
 				for(int vertex:copy){
 					vertices.remove(vertex);
 					index = reverse.get(vertices);
-					matrix[k][index] = 1;	// amortized time complexity of get on a FastHashSet is constant, as opposed to linear in vertices ie (ln n) with HashSet
+					matrix[k][index] = 1;
 					vertices.add(vertex);
 					isZeroes[k] = false;
 					lastOne[k] = (index>lastOne[k]) ? index : lastOne[k];
