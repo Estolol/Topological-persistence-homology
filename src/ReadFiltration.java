@@ -25,9 +25,10 @@ public class ReadFiltration {
 			matrix.sortVect();
 			matrix.initMatrix();
 			long initTime = System.currentTimeMillis();
+			//System.out.println(matrix.toString());
 			matrix.reduction();
 			long reductionTime = System.currentTimeMillis();
-			matrix.barcode("results/"+base+".out");
+			matrix.barcode("results_dense/"+base+".out");
 			long endTime = System.currentTimeMillis();
 			//System.out.println(matrix.toString());
 			System.out.println("Barcode construction on "+base+" using Dense Matrices took " + ((float)(endTime - startTime)/1000) + " seconds.");
@@ -44,8 +45,7 @@ public class ReadFiltration {
 			long reductionTime = System.currentTimeMillis();
 			matrix.barcode("results/"+base+".out");
 			long endTime = System.currentTimeMillis();
-			//System.out.println(matrix.toString());
-			System.out.println("Barcode construction on "+base+" using Spare Matrices took " + ((endTime - startTime)/1000) + " seconds.");
+			System.out.println("Barcode construction on "+base+" using Sparse Matrices took " + ((endTime - startTime)/1000) + " seconds.");
 			System.out.println("Initialisation: " + ((initTime - startTime)/1000) + " seconds.");
 			System.out.println("Reduction: " + ((reductionTime - initTime)/1000) + " seconds.");
 			System.out.println("Barcode extraction: " + ((endTime - reductionTime)/1000) + " seconds.");

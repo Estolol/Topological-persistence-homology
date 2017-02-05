@@ -9,16 +9,16 @@ public class SparseMatrix {
 	ArrayList<LinkedList<Integer>> matrix; // on stocke les coordonnées où il y a des 1
 	Hashtable<Integer,Integer> pivots;
 	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>();
-	
+
 	public SparseMatrix(Vector<Simplex> F){
 		this.F=F;
 		this.pivots = new Hashtable<Integer,Integer>();
 	}
-	
+
 	// on trie le vecteur pour avoir un ordre, on trie selon les temps croissants
 		// pas besoin de trier suivant une autre composante, on peut se contenter de garder le vecteur trié
 		// vu que l'ordre arbitraire obtenu sera conserve quand on construira la matrice
-		
+
 	public void sortVect(){
 		int length = F.size();
 		F.sort(new Comparator<Simplex>(){
@@ -38,7 +38,7 @@ public class SparseMatrix {
 		// TODO youpi
 	}
 
-	
+
 	public void initMatrix(){ // time complexity n * d where d is the largest dimension in F, thus n * (ln n), where n is the size of F.
 		int size = F.size();
 		matrix = new ArrayList<LinkedList<Integer>>(); //matrice qu'on veut remplir
@@ -61,7 +61,7 @@ public class SparseMatrix {
 				column.add(reverse.get(vertices));	// amortized time complexity of get on a FastHashSet is constant
 				vertices.add(vertex);
 			}
-			
+
 			column.sort(new Comparator<Integer>(){
 				public int compare(Integer s1, Integer s2)
 			    {
@@ -72,26 +72,19 @@ public class SparseMatrix {
 			matrix.add(columnFinal);
 		}
 	}
-	
+
 	public LinkedList<Integer> reduce(LinkedList<Integer> column){
 		int lastOne = column.isEmpty() ? (-1) : column.getLast();
 		LinkedList<Integer> newColumn;
 		LinkedList<Integer> currentPivot;
 		int left, right;
 		while(!column.isEmpty() && pivots.containsKey(lastOne)){
-			//System.out.println("lastOne : "+lastOne);
 			newColumn = new LinkedList<Integer>();
 			currentPivot = new LinkedList<Integer>(matrix.get(pivots.get(lastOne)));
-			//System.out.println("pivotsColumn : "+pivots.get(lastOne));
-			//System.out.println("currentPivot Size :"+currentPivot.size());
-			//System.out.println("column Size :"+column.size());
 			while(!column.isEmpty() && !currentPivot.isEmpty()){
 				left = column.pollFirst();
 				right = currentPivot.pollFirst();
-				//System.out.println("left : "+left);
-				//System.out.println("right : "+right);
 				if(left==right){
-					//System.out.println("Skipped");
 					continue;
 				}
 				if(left<right){
@@ -113,24 +106,18 @@ public class SparseMatrix {
 			lastOne=column.isEmpty() ? (-1) : column.getLast();
 		}
 		return column;
-	}	
-	
+	}
+
 	public void reduction(){
 		int size = F.size();
-		
+
 		for(int i=0;i<size;i++){
-			//System.out.println(i+" "+matrix.get(4).size());
 			LinkedList<Integer> temp = matrix.get(i);
 			int lastOne = temp.isEmpty() ? (-1) : temp.getLast();
 			if(!pivots.containsKey(lastOne)){
 				pivots.put(lastOne, i);
-				/*if(lastOne==2){
-					System.out.println(i);
-					System.out.println(temp.size());
-				}*/
 			}
 			else{
-				//System.out.println(i);
 				LinkedList<Integer> newPivot = reduce(temp);
 				if(!newPivot.isEmpty()){
 					pivots.put(newPivot.getLast(), i);
@@ -140,17 +127,16 @@ public class SparseMatrix {
 		}
 	}
 
-	
 
-	
+
+
 	public void barcode(String output){
 		try {
 			PrintWriter writer = new PrintWriter(output , "UTF-8");
 			for(int i=0;i<matrix.size();i++){
 				if(matrix.get(i).isEmpty()){
 					if(pivots.containsKey(i)){
-						int indice = pivots.get(i);
-						writer.println(F.get(i).dim+" "+F.get(i).val+" "+F.get(indice).val);
+						writer.println(F.get(i).dim+" "+F.get(i).val+" "+F.get(pivots.get(i)).val);
 					}
 					else{
 						writer.println(F.get(i).dim+" "+F.get(i).val+" inf");
@@ -164,5 +150,5 @@ public class SparseMatrix {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

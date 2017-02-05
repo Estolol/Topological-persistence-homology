@@ -19,7 +19,7 @@ if __name__ == '__main__':
         quit()
     # Then we build the simplicial complex from the singleton 0 to the d-ball.
     scomplex = [[0]]
-    for i in range(1,d+1): # to move from the i-1 ball to the i-ball, we add a point i and "connect" it to every past simplex
+    for i in range(1,d+2): # to move from the i-1 ball to the i-ball, we add a point i and "connect" it to every past simplex
         buff = [[i]]
         for s in scomplex:
             copy = [n for n in s]

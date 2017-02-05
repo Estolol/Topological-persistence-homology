@@ -7,16 +7,18 @@ import java.util.*;
 public class DenseMatrix {
 	Vector<Simplex> F;
 	int[][] matrix;
-	HashMap<Integer,int[]> pivots = new HashMap<Integer,int[]>();
+	HashMap<Integer,Integer> pivots = new HashMap<Integer,Integer>();
 	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>(); // from a set of vertices, find the index in F (post-sort)
+	boolean[] isZeroes; // store whether matrix[i] is all zeroes or not
+	int[] lastOne; // store the largest j such that matrix[i][j] isn't zero
 
 	public DenseMatrix(Vector<Simplex> F){
 		this.F=F;
+		isZeroes = new boolean[F.size()];
+		lastOne = new int[F.size()];
 	}
 
-	// on trie le vecteur pour avoir un ordre, on trie selon les temps croissants
-	// pas besoin de trier suivant une autre composante, on peut se contenter de garder le vecteur trié
-	// vu que l'ordre arbitraire obtenu sera conserve quand on construira la matrice
+	// we sort the input vector by increasing value
 
 	public void sortVect(){
 		int length = F.size();
@@ -27,32 +29,35 @@ public class DenseMatrix {
 		    }
 		}); // we compare Simplices using Float.compare on the values of the filtration
 		int size = F.size();
-		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
+		for(int k = 0; k<size; k++){ // k is the index of the current simplex
 			reverse.put(F.get(k).vert,k);
 		}
 	}
 
-	// on remplit la matrice (matrice dense pour le moment)
+	// filling the matrix
 
 	public void initMatrix(){ // time complexity n * d where d is the largest dimension in F, thus n * (ln n), where n is the size of F.
 		int size = F.size();
-		matrix = new int[size][size]; //matrice qu'on veut remplir
+		matrix = new int[size][size];
 		Simplex simp;
 		FastHashSet<Integer> vertices;
 		FastHashSet<Integer> copy;
-
-		for(int k = 0; k<size; k++){ // k est l'indice du simplexe qu'on examine en ce moment
+		int index;
+		for(int k = 0; k<size; k++){ // k is the index of the current simplex
 			simp = F.get(k);
-			if(simp.dim==0){ // pour un point
-				continue;
-			}
-
-			vertices = simp.vert;
-			copy = new FastHashSet<Integer>(vertices); // copy to iterate over vertices
-			for(int vertex:copy){
-				vertices.remove(vertex);
-				matrix[k][reverse.get(vertices)] = 1;	// amortized time complexity of get on a FastHashSet is constant
-				vertices.add(vertex);
+			isZeroes[k] = true;
+			lastOne[k] = (-1);
+			if(simp.dim!=0){ // ignore points
+				vertices = simp.vert;
+				copy = new FastHashSet<Integer>(vertices); // copy to iterate over vertices
+				for(int vertex:copy){
+					vertices.remove(vertex);
+					index = reverse.get(vertices);
+					matrix[k][index] = 1;	// amortized time complexity of get on a FastHashSet is constant, as opposed to linear in vertices ie (ln n) with HashSet
+					vertices.add(vertex);
+					isZeroes[k] = false;
+					lastOne[k] = (index>lastOne[k]) ? index : lastOne[k];
+				}
 			}
 		}
 	}
@@ -71,74 +76,49 @@ public class DenseMatrix {
 	}
 
 
+	public void reduce(int index){
+		int current;
+		boolean empty;
+		int last;
+		while(!isZeroes[index] && pivots.containsKey(lastOne[index])){
+			current = pivots.get(lastOne[index]);
+			empty = true;
+			last = (-1);
+			for(int j=0; j<=lastOne[index]; j++){
+				matrix[index][j] = (matrix[index][j] == matrix[current][j]) ? 0 : 1;
+				if(matrix[index][j]==1){
+					empty = false;
+					last = j;
+				}
+			}
+			isZeroes[index] = empty;
+			lastOne[index] = last;
+		}
+	}
+
 	public void reduction(){
-		// on va stocker les pivots dans pivots, les clefs seront l'emplacement du 1 le plus bas
 		int size = F.size();
-
 		for(int i = 0; i<size; i++){
-			int[] temp = matrix[i];
-			int lastOne = getLastOne(temp);
-			if(!pivots.containsKey(lastOne)){
-				pivots.put(lastOne,temp);
+			if(!pivots.containsKey(lastOne[i])){
+				pivots.put(lastOne[i],i);
 			}
 			else{
-				int[] newPivot = reduce(temp);
-				if(!containsOnlyZeros(newPivot)){
-					pivots.put(getLastOne(newPivot), newPivot);
+				reduce(i);
+				if(!isZeroes[i]){
+					pivots.put(lastOne[i], i);
 				}
-				matrix[i] = newPivot;
 			}
 		}
 	}
-
-	public int getLastOne(int[] temp){
-		int lastOne = -1;
-		for(int j = 0; j<temp.length ; j++){
-			if(temp[j]!=0){
-				lastOne = j;
-			}
-		}
-		return lastOne;
-	}
-
-	public boolean containsOnlyZeros(int[] list){
-		for(int i=0; i<list.length; i++){
-			if(list[i]!=0) return false;
-		}
-		return true;
-	}
-
-	public int[] reduce(int[] temp){ // a modifier pour qe ca marche a coup sur (j'ai l'impression qu'il faudra des double)
-		int[] temp2 = temp;
-		if(containsOnlyZeros(temp)){
-			return temp;
-		}
-		else{
-			int lastOne = getLastOne(temp);
-			if(!pivots.containsKey(lastOne)){
-				return temp;
-			}
-			else{
-				int[] pivot = pivots.get(lastOne);
-				for(int k=0; k<pivot.length;k++){
-					temp2[k] = Math.abs(temp[k]);
-					temp2[k] = Math.abs(temp2[k] - pivot[k]);
-				}
-				return reduce(temp2);
-			}
-		}
-	}
-
 
 
 	public void barcode(String output){
 		try {
 			PrintWriter writer = new PrintWriter(output , "UTF-8");
 			for(int i=0; i<matrix.length;i++){
-				if(containsOnlyZeros(matrix[i])){
+				if(isZeroes[i]){
 					if(pivots.containsKey(i)){
-						int indice = searchColumn(pivots.get(i));
-						writer.println(F.get(i).dim+" "+F.get(i).val+" "+F.get(indice).val);
+						writer.println(F.get(i).dim+" "+F.get(i).val+" "+F.get(pivots.get(i)).val);
 					}
 					else{
 						writer.println(F.get(i).dim+" "+F.get(i).val+" inf");
@@ -151,15 +131,6 @@ public class DenseMatrix {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public int searchColumn(int[] column){
-		for(int i=0;i<matrix.length;i++){
-			if(matrix[i].equals(column)){
-				return i;
-			}
-		}
-		return -1;
 	}
 
 }
