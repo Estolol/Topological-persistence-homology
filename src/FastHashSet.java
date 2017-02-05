@@ -1,6 +1,6 @@
 import java.util.*;
 
-// an HashSet extension that constantly keeps track of the value of its hashCode() method, making it constant (amortized) time.
+// an HashSet extension that constantly keeps track of the value of its hashCode() method, making it constant time.
 class FastHashSet<E> extends HashSet<E> {
   int h = 0;
 
