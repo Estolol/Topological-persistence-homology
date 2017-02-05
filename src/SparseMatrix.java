@@ -7,12 +7,12 @@ import java.util.*;
 public class SparseMatrix {
 	Vector<Simplex> F;
 	ArrayList<LinkedList<Integer>> matrix; // on stocke les coordonnées où il y a des 1
-	Hashtable<Integer,LinkedList<Integer>> pivots;
+	Hashtable<Integer,Integer> pivots;
 	HashMap<FastHashSet<Integer>,Integer> reverse = new HashMap<FastHashSet<Integer>,Integer>();
 	
 	public SparseMatrix(Vector<Simplex> F){
 		this.F=F;
-		this.pivots = new Hashtable<Integer,LinkedList<Integer>>();
+		this.pivots = new Hashtable<Integer,Integer>();
 	}
 	
 	// on trie le vecteur pour avoir un ordre, on trie selon les temps croissants
@@ -73,91 +73,75 @@ public class SparseMatrix {
 		}
 	}
 	
+	public LinkedList<Integer> reduce(LinkedList<Integer> column){
+		int lastOne = column.isEmpty() ? (-1) : column.getLast();
+		LinkedList<Integer> newColumn;
+		LinkedList<Integer> currentPivot;
+		int left, right;
+		while(!column.isEmpty() && pivots.containsKey(lastOne)){
+			//System.out.println("lastOne : "+lastOne);
+			newColumn = new LinkedList<Integer>();
+			currentPivot = new LinkedList<Integer>(matrix.get(pivots.get(lastOne)));
+			//System.out.println("pivotsColumn : "+pivots.get(lastOne));
+			//System.out.println("currentPivot Size :"+currentPivot.size());
+			//System.out.println("column Size :"+column.size());
+			while(!column.isEmpty() && !currentPivot.isEmpty()){
+				left = column.pollFirst();
+				right = currentPivot.pollFirst();
+				//System.out.println("left : "+left);
+				//System.out.println("right : "+right);
+				if(left==right){
+					//System.out.println("Skipped");
+					continue;
+				}
+				if(left<right){
+					newColumn.addLast(left);
+					currentPivot.addFirst(right);
+				}
+				else{
+					newColumn.addLast(right);
+					column.addFirst(left);
+				}
+			}
+			while(!currentPivot.isEmpty()){
+				newColumn.add(currentPivot.pollFirst());
+			}
+			while(!column.isEmpty()){
+				newColumn.add(column.pollFirst());
+			}
+			column=newColumn;
+			lastOne=column.isEmpty() ? (-1) : column.getLast();
+		}
+		return column;
+	}	
+	
 	public void reduction(){
 		int size = F.size();
 		
 		for(int i=0;i<size;i++){
+			//System.out.println(i+" "+matrix.get(4).size());
 			LinkedList<Integer> temp = matrix.get(i);
-			int lastOne = getLastOne(temp);
+			int lastOne = temp.isEmpty() ? (-1) : temp.getLast();
 			if(!pivots.containsKey(lastOne)){
-				pivots.put(lastOne, temp);
+				pivots.put(lastOne, i);
+				/*if(lastOne==2){
+					System.out.println(i);
+					System.out.println(temp.size());
+				}*/
 			}
 			else{
+				//System.out.println(i);
 				LinkedList<Integer> newPivot = reduce(temp);
 				if(!newPivot.isEmpty()){
-					pivots.put(getLastOne(newPivot), newPivot);
+					pivots.put(newPivot.getLast(), i);
 				}
 				matrix.set(i, newPivot);
 			}
 		}
 	}
+
 	
-	public int getLastOne(LinkedList<Integer> temp){
-		if(!temp.isEmpty()) return (int) temp.get(temp.size()-1);
-		else return -1;
-	}
-	
-	public int[] toList(LinkedList<Integer> temp){
-		int size = F.size();
-		int[] result = new int[size];
-		for(int i = 0; i<temp.size();i++){
-			int index = (int) temp.get(i);
-			result[index]=1;
-		}
-		return result;
-	}
-	
-	public LinkedList<Integer> toArray(int[] temp){
-		LinkedList<Integer> result = new LinkedList<Integer>();
-		for(int i=0; i<temp.length;i++){
-			if(temp[i]!=0){
-				result.add(i);
-			}
-		}
-		return result;
-	}
-	
-	public LinkedList<Integer> normalize(LinkedList<Integer> temp){
-		if(temp.isEmpty()) return temp;
-		int lastOne = getLastOne(temp);
-		for(int i=0; i<temp.size();i++){
-			temp.get(i)[1] = Math.abs(temp.get(i)[1] / temp.get(temp.size()-1)[1]);
-		}
-		return temp;
-	}
-	
-	public LinkedList<Integer> reduce(LinkedList<Integer> column){
-		LinkedList<Integer> copy = column;
-		int lastOne = getLastOne(column);
-		while(!copy.isEmpty() && pivots.containsKey(lastOne)){
-			LinkedList<Integer> newPivot = column;
-			LinkedList<Integer> currentPivot = pivots.get(lastOne);
-			for(int k=0;k<currentPivot.size();k++){
-				int value = currentPivot.get(k);
-				if(newPivot.remove((Integer) value));
-				else{
-					
-				}
-			}
-		}
-		return column;
-		if(column.isEmpty()) return column;
-		int lastOne = getLastOne(column);
-		
-		if(!pivots.containsKey(lastOne)){
-			return column;
-		}
-		else{
-			LinkedList<Integer> newPivot = column;
-			Integer currentPivot = toList(pivots.get(lastOne));
-			for(int k=0;k<lastOne;k++){
-				newPivot[k] = newPivot[k] / newPivot[lastOne] - currentPivot[k];
-			}
-			newPivot[lastOne] = 0;
-			LinkedList<Integer> newPivotArray = normalize(toArray(newPivot));
-			return reduce(newPivotArray);
-		}
-	}
+
 	
 	public void barcode(String output){
 		try {
@@ -165,7 +149,7 @@ public class SparseMatrix {
 			for(int i=0;i<matrix.size();i++){
 				if(matrix.get(i).isEmpty()){
 					if(pivots.containsKey(i)){
-						int indice = searchColumn(pivots.get(i));
+						int indice = pivots.get(i);
 						writer.println(F.get(i).dim+" "+F.get(i).val+" "+F.get(indice).val);
 					}
 					else{
@@ -181,12 +165,4 @@ public class SparseMatrix {
 		}
 	}
 	
-	public int searchColumn(LinkedList<Integer> column){
-		for(int i=0;i<matrix.size();i++){
-			if(matrix.get(i).equals(column)){
-				return i;
-			}
-		}
-		return -1;
-	}
 }
