@@ -9,7 +9,7 @@ class Simplex {
 	Simplex(Scanner sc){
 		val = sc.nextFloat();
 		dim = sc.nextInt();
-		vert = new HashSet<Integer>();
+		vert = new HashSet<Integer>(); // we use HashSet instead of TreeSet for constant time add and remove
 		for (int i=0; i<=dim; i++)
 			vert.add(sc.nextInt()+1);
 	}

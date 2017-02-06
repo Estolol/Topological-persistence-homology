@@ -6,8 +6,8 @@ import java.util.*;
 
 public class DenseMatrix {
 	Vector<Simplex> F;
-	int[][] matrix;
-	HashMap<Integer,Integer> pivots = new HashMap<Integer,Integer>();
+	int[][] matrix; // a naive representation of a binary matrix
+	HashMap<Integer,Integer> pivots = new HashMap<Integer,Integer>(); // mapping a line number to the column of the pivot on that line
 	HashMap<HashSet<Integer>,Integer> reverse = new HashMap<HashSet<Integer>,Integer>(); // from a set of vertices, find the index in F (post-sort)
 	boolean[] isZeroes; // store whether matrix[i] is all zeroes or not
 	int[] lastOne; // store the largest j such that matrix[i][j] isn't zero
@@ -19,7 +19,6 @@ public class DenseMatrix {
 	}
 
 	// we sort the input vector by increasing value
-
 	public void sortVect(){
 		int length = F.size();
 		F.sort(new Comparator<Simplex>(){
@@ -34,9 +33,9 @@ public class DenseMatrix {
 		}
 	}
 
-	// filling the matrix
 
-	public void initMatrix(){ // time complexity n * d where d is the largest dimension in F, thus n * (ln n), where n is the size of F.
+	// computing the boundary matrix of the filtration
+	public void initMatrix(){ // time complexity O(m * d²) where d is the largest dimension in F, thus O(m * (ln m)²), where m is the size of F.
 		int size = F.size();
 		matrix = new int[size][size];
 		Simplex simp;
@@ -55,8 +54,8 @@ public class DenseMatrix {
 					index = reverse.get(vertices);
 					matrix[k][index] = 1;
 					vertices.add(vertex);
-					isZeroes[k] = false;
-					lastOne[k] = (index>lastOne[k]) ? index : lastOne[k];
+					isZeroes[k] = false; // initialize isZeroes
+					lastOne[k] = (index>lastOne[k]) ? index : lastOne[k]; // initialize lastOne
 				}
 			}
 		}
@@ -76,35 +75,37 @@ public class DenseMatrix {
 	}
 
 
-	public void reduce(int index){
+	public void reduce(int index){ // time complexity O(m²)
 		int current;
 		boolean empty;
 		int last;
 		while(!isZeroes[index] && pivots.containsKey(lastOne[index])){
+			// reduce the column until either it is empty or we found a new pivot. O(m) iterations since lastOne decreases
 			current = pivots.get(lastOne[index]);
 			empty = true;
 			last = (-1);
-			for(int j=0; j<=lastOne[index]; j++){
+			for(int j=0; j<=lastOne[index]; j++){ // iterate over rows of the column and sum. time complexity O(m)
 				matrix[index][j] = (matrix[index][j] == matrix[current][j]) ? 0 : 1;
 				if(matrix[index][j]==1){
 					empty = false;
 					last = j;
 				}
 			}
-			isZeroes[index] = empty;
-			lastOne[index] = last;
+			isZeroes[index] = empty; // keep isZeroes updated for later use
+			lastOne[index] = last; // keep lastOne updated for later use
 		}
 	}
 
-	public void reduction(){
+	// gaussian elemination on the matrix
+	public void elimination(){ // time complexity O(m³)
 		int size = F.size();
-		for(int i = 0; i<size; i++){
-			if(!pivots.containsKey(lastOne[i])){
+		for(int i = 0; i<size; i++){ // iterate over the m columns
+			if(!pivots.containsKey(lastOne[i])){ // if we found a new pivot we add it to the map
 				pivots.put(lastOne[i],i);
 			}
-			else{
+			else{ // otherwise we reduce the column
 				reduce(i);
-				if(!isZeroes[i]){
+				if(!isZeroes[i]){ // if we found a new pivot we add it to the map
 					pivots.put(lastOne[i], i);
 				}
 			}
@@ -112,6 +113,7 @@ public class DenseMatrix {
 	}
 
 
+	// compute the barcode and write it to a file
 	public void barcode(String output){
 		try {
 			PrintWriter writer = new PrintWriter(output , "UTF-8");
