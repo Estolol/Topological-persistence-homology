@@ -1,6 +1,6 @@
-# Topological Persistence (Project for [INF563 Topological Data Analysis](https://moodle.polytechnique.fr/enrol/index.php?id=2650) @ Ecole polytechnique)
+# Topological Persistence (Project for [INF563 Topological Data Analysis](https://moodle.polytechnique.fr/enrol/index.php?id=5053) @ Ecole polytechnique)
 
-[Link](http://www.enseignement.polytechnique.fr/informatique/INF563/TD5/index.html) to the project description.
+[Link](http://www.enseignement.polytechnique.fr/informatique/INF556/TD5/index.html) to the project description.
 
 ## File structure
 
